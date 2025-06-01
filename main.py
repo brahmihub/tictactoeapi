@@ -15,7 +15,7 @@ def format_board(board):
         row = [f" {board[i + j]} " if board[i + j] in ["❌", "⭕"] else f" {board[i + j]} " for j in range(3)]
         rows.append("|".join(row))
     
-    separator = "\n" + "-" * 11 + "\n"
+    separator = "\n" + "                " * 11 + "\n"
     board_str = separator.join(rows)
     
     return f"{board_str}\nChoose one of the available numbers!"
