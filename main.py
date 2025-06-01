@@ -8,7 +8,7 @@ active_games = {}
 
 def get_empty_board():
     
-    return ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣"]
+    return [" 1 ", " 2 ", " 3 ", " 4 ", " 5 ", " 6 ", " 7 ", " 8 ", " 9 "]
 
 def format_board(board):
     # Format each cell with spaces (e.g. " 1 ", " ❌ ", etc.)
