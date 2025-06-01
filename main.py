@@ -6,21 +6,18 @@ app = FastAPI()
 pending_challenges = set()
 active_games = {}
 
+def get_empty_board():
+    return ["1", "2", "3", "4", "5", "6", "7", "8", "9"]
+
 def format_board(board):
-    # Create three rows
+    # Create three rows of 3 items each
     rows = []
     for i in range(0, 9, 3):
         row = [board[i + j] if board[i + j] in ["❌", "⭕"] else board[i + j] for j in range(3)]
         rows.append("|".join(row))
     
-    # Join the rows using ~ to keep it single-line for Twitch
+    # Join the rows using ~ to make a single-line board for Twitch
     return f"{' ~ '.join(rows)} — Choose a number!"
-
-
-
-
-
-
 
 @app.get("/tac")
 async def tac_command(request: Request):
@@ -50,6 +47,24 @@ async def tac_command(request: Request):
             return PlainTextResponse(f"@{user}, that spot is already taken!")
         symbol = game["symbols"][user]
         board[move - 1] = symbol
+
+        # Check for win
+        wins = [(0,1,2), (3,4,5), (6,7,8),
+                (0,3,6), (1,4,7), (2,5,8),
+                (0,4,8), (2,4,6)]
+        if any(board[a] == board[b] == board[c] == symbol for a, b, c in wins):
+            del active_games[user_game]
+            return PlainTextResponse(
+                f"@{user} wins!\n\n{format_board(board)}"
+            )
+
+        # Check for draw
+        if all(cell in ["❌", "⭕"] for cell in board):
+            del active_games[user_game]
+            return PlainTextResponse(
+                f"It's a draw!\n\n{format_board(board)}"
+            )
+
         next_turn = user_game[0] if user == user_game[1] else user_game[1]
         game["turn"] = next_turn
         return PlainTextResponse(
