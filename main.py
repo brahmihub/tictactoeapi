@@ -10,14 +10,20 @@ def get_empty_board():
     return ["1", "2", "3", "4", "5", "6", "7", "8", "9"]
 
 def format_board(board):
-    # Create three rows of 3 items each
+    # Format each cell with spaces (e.g. " 1 ", " ❌ ", etc.)
+    formatted = [
+        f" {cell} " if cell in ["❌", "⭕"] else f" {cell} " for cell in board
+    ]
+
+    # Create rows
     rows = []
     for i in range(0, 9, 3):
-        row = [board[i + j] if board[i + j] in ["❌", "⭕"] else board[i + j] for j in range(3)]
-        rows.append("|".join(row))
-    
-    # Join the rows using ~ to make a single-line board for Twitch
-    return f"{' "\n" '.join(rows)}  Choose a number!"
+        row = "|".join(formatted[i:i+3])
+        rows.append(row)
+
+    # Join rows with a visible separator (you can change this)
+    return "\n".join(rows) + "\nChoose a number!"
+
 
 @app.get("/tac")
 async def tac_command(request: Request):
