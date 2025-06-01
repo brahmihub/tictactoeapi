@@ -30,10 +30,27 @@ def format_board(board):
 
     return f"{symbol_row}{numbered_row}Choose one of the available numbers!"
 
-@app.get("/tac")
+@app.get("/", response_class=PlainTextResponse)
+async def root():
+    return "Tic Tac Toe API is live! Use /tac with user and message query parameters."
+
+@app.get("/tac", response_class=PlainTextResponse)
 async def tac_command(request: Request):
     user = request.query_params.get("user", "").lstrip("@").lower()
-    query = request.query_params.get("query", "").strip().lower()
+    message = request.query_params.get("message", "").strip().lower()
+
+    if not user:
+        return PlainTextResponse("Error: 'user' query parameter is required.", status_code=400)
+    if not message:
+        return PlainTextResponse(f"@{user}, please provide a message parameter to play.")
+
+    # Extract command and argument from message, assuming format "!tac <arg>"
+    # We expect message like "!tac 1" or "!tac @target"
+    if not message.startswith("!tac"):
+        return PlainTextResponse(f"@{user}, invalid command. Use !tac [move or @opponent].")
+
+    parts = message.split(maxsplit=1)
+    query = parts[1] if len(parts) > 1 else ""
 
     if not query:
         return PlainTextResponse(f"@{user}, tag someone or use !tac [1-9] to make a move.")
