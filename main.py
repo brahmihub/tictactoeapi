@@ -12,25 +12,14 @@ def get_empty_board():
 def format_board(board):
     rows = []
     for i in range(0, 9, 3):
-        # Format each cell in the row
-        row_cells = []
-        for j in range(3):
-            cell = board[i + j]
-            if cell in ["❌", "⭕"]:
-                row_cells.append(f" {cell} ")
-            else:
-                row_cells.append(f" {cell} ")
-        # Join the row with vertical bars
-        row_str = "|".join(row_cells)
-        rows.append(f"|{row_str}|")
+        row = [f" {board[i + j]} " if board[i + j] in ["❌", "⭕"] else f" {board[i + j]} " for j in range(3)]
+        rows.append("|".join(row))
     
-    # Optional: separator line between rows
-    separator = "\n" + "-" * len(rows[0]) + "\n"
-    
-    # Join all rows with separator
+    separator = "\n" + "-" * 11 + "\n"
     board_str = separator.join(rows)
     
     return f"{board_str}\nChoose one of the available numbers!"
+
 
 
 
