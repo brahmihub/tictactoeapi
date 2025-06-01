@@ -13,7 +13,7 @@ def get_empty_board():
 def format_board(board):
     # Format each cell with spaces (e.g. " 1 ", " ❌ ", etc.)
     formatted = [
-        f"{cell}" if cell in ["❌", "⭕"] else f"{cell}" for cell in board
+        f"{cell}" if cell in ["X", "O"] else f"{cell}" for cell in board
     ]
 
     # Create rows
@@ -50,7 +50,7 @@ async def tac_command(request: Request):
         if user != game["turn"]:
             return PlainTextResponse(f"@{user}, it's not your turn!")
         board = game["board"]
-        if board[move - 1] in ["❌", "⭕"]:
+        if board[move - 1] in ["X", "O"]:
             return PlainTextResponse(f"@{user}, that spot is already taken!")
         symbol = game["symbols"][user]
         board[move - 1] = symbol
@@ -66,7 +66,7 @@ async def tac_command(request: Request):
             )
 
         # Check for draw
-        if all(cell in ["❌", "⭕"] for cell in board):
+        if all(cell in ["X", "O"] for cell in board):
             del active_games[user_game]
             return PlainTextResponse(
                 f"It's a draw!\n\n{format_board(board)}"
@@ -92,14 +92,14 @@ async def tac_command(request: Request):
         pending_challenges.remove(pair)
         board = get_empty_board()
         player1, player2 = pair
-        symbols = {player1: "❌", player2: "⭕"}
+        symbols = {player1: "X", player2: "O"}
         active_games[pair] = {
             "board": board,
             "turn": player1,
             "symbols": symbols
         }
         return PlainTextResponse(
-            f"GAME STARTED!-----------{format_board(board)} @{user} vs @{target} — @{player1}, you're ❌ — go first!"
+            f"GAME STARTED!-----------{format_board(board)} @{user} vs @{target} — @{player1}, you're X — go first!"
         )
     else:
         pending_challenges.add(pair)
