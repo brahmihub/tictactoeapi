@@ -3,10 +3,11 @@ from fastapi.responses import PlainTextResponse
 
 app = FastAPI()
 
-# In-memory storage
+# In-memory data
 pending_challenges = set()
 active_games = {}
 
+# Board template
 def get_board():
     return "|1|2|3|\n|4|5|6|\n|7|8|9|"
 
@@ -18,7 +19,7 @@ async def tac_command(request: Request):
     if not target:
         return PlainTextResponse(f"@{caller}, tag someone to play!")
 
-    if target == caller:
+    if caller == target:
         return PlainTextResponse(f"@{caller}, you can't play against yourself!")
 
     pair = tuple(sorted([caller, target]))
@@ -31,11 +32,11 @@ async def tac_command(request: Request):
         active_games[pair] = get_board()
         board = get_board()
         return PlainTextResponse(
-            f"@{caller} vs {target} — Game started!\n{board}"
+            f"@{caller} vs @{target} — Game started!\n\n{board}"
         )
     else:
         pending_challenges.add(pair)
         return PlainTextResponse(
-            f"@{caller} vs {target} — Tic Tac Toe challenge sent!\n"
-            f"@{target}, type !tac {caller} to accept.\n\nBoard:\n{get_board()}"
+            f"@{caller} vs @{target} — Tic Tac Toe challenge sent!\n"
+            f"@{target}, type !tac {caller} to accept."
         )
