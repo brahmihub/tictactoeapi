@@ -22,7 +22,7 @@ def format_board(board):
         rows.append(row)
 
     # Join rows with a visible separator (you can change this)
-    return ("..........................................................................").join(rows)"
+    return "..........................................................................".join(rows)"
 
 
 @app.get("/tac")
