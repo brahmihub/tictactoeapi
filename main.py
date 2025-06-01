@@ -11,16 +11,21 @@ def get_empty_board():
 
 def format_board(board):
     display = ""
-
-    # First row
-    display += f"|{board[0] if board[0] in ['❌', '⭕'] else '  ' + board[0]}|  {board[1] if board[1] in ['❌', '⭕'] else board[1]} |  {board[2] if board[2] in ['❌', '⭕'] else board[2]} |                                       \n"
-    # Second row
-    display += f"|  {board[3] if board[3] not in ['❌', '⭕'] else ' '} |  {board[4] if board[4] not in ['❌', '⭕'] else ' '} |  {board[5] if board[5] not in ['❌', '⭕'] else ' '} |                                        \n"
-    # Third row
-    display += f"|  {board[6] if board[6] not in ['❌', '⭕'] else ' '} |  {board[7] if board[7] not in ['❌', '⭕'] else ' '} |  {board[8] if board[8] not in ['❌', '⭕'] else ' '} |                        \n"
-
+    for i in range(9):
+        cell = board[i]
+        # Show symbol if it's a player's mark; otherwise show the cell number with padding for alignment
+        if cell in ["❌", "⭕"]:
+            display += f"|  {cell} "
+        else:
+            display += f"|  {cell} "
+        
+        # End of a row
+        if (i + 1) % 3 == 0:
+            display += "|\n"
+    
     display += "Choose one of the available numbers!"
     return display
+
 
 
 @app.get("/tac")
