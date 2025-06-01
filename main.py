@@ -62,14 +62,14 @@ async def tac_command(request: Request):
         if any(board[a] == board[b] == board[c] == symbol for a, b, c in wins):
             del active_games[user_game]
             return PlainTextResponse(
-                f"@{user} wins!\n\n{format_board(board)}"
+                f"-------------------------------{format_board(board)} @{user} wins!"
             )
 
         # Check for draw
         if all(cell in [" X ", " O "] for cell in board):
             del active_games[user_game]
             return PlainTextResponse(
-                f"It's a draw!\n\n{format_board(board)}"
+                f"-------------------------------{format_board(board)} It's a draw!"
             )
 
         next_turn = user_game[0] if user == user_game[1] else user_game[1]
