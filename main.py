@@ -23,7 +23,7 @@ def format_board(board):
         rows.append(row)
 
     # Join rows with a visible separator (you can change this)
-    return ''.join(row + ".........................................................." for row in rows)
+    return ''.join(row + "............................................................." for row in rows)
 
 
 @app.get("/tac")
@@ -99,7 +99,7 @@ async def tac_command(request: Request):
             "symbols": symbols
         }
         return PlainTextResponse(
-            f" Game started! -------{format_board(board)} @{user} vs @{target} — @{player1}, you're ❌ — go first!"
+            f" Game started! --------------{format_board(board)} @{user} vs @{target} — @{player1}, you're ❌ — go first!"
         )
     else:
         pending_challenges.add(pair)
