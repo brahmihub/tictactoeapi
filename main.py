@@ -6,17 +6,15 @@ app = FastAPI()
 pending_challenges = set()
 active_games = {}
 
-def get_empty_board():
-    return ["1", "2", "3", "4", "5", "6", "7", "8", "9"]
-
 def format_board(board):
     rows = []
     for i in range(0, 9, 3):
         row = [board[i + j] if board[i + j] in ["❌", "⭕"] else board[i + j] for j in range(3)]
         rows.append("|".join(row))
     
-    board_str = " ~ ".join(rows)  # Use ~ to separate rows on a single line
+    board_str = " ~ ".join(rows)  # Use ~ or // or ↩ or | to split rows
     return f"{board_str} — Choose a number!"
+
 
 
 
