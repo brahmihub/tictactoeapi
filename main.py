@@ -36,6 +36,7 @@ def format_board(board):
 
 
 
+
 @app.get("/tac")
 async def tac_command(request: Request):
     user = request.query_params.get("user", "").lstrip("@").lower()
