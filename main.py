@@ -13,7 +13,7 @@ def get_empty_board():
 def format_board(board):
     # Format each cell with spaces (e.g. " 1 ", " ❌ ", etc.)
     formatted = [
-        f"{cell}" if cell in ["❌", "⭕"] else f"  {cell} " for cell in board
+        f"{cell}" if cell in ["❌", "⭕"] else f"{cell}" for cell in board
     ]
 
     # Create rows
