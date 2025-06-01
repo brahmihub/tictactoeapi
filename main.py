@@ -13,18 +13,16 @@ def format_board(board):
     display = ""
     for i in range(9):
         cell = board[i]
-        # Show symbol if it's a player's mark; otherwise show the cell number with padding for alignment
         if cell in ["❌", "⭕"]:
-            display += f"|  {cell} "
+            display += f"| {cell} "
         else:
-            display += f"|  {cell} "
-        
-        # End of a row
+            display += f"| {cell} "
         if (i + 1) % 3 == 0:
-            display += "|\n"
+            display += "|\n"  # Add newline at end of each row
     
     display += "Choose one of the available numbers!"
     return display
+
 
 
 
