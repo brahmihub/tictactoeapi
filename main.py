@@ -3,9 +3,8 @@ from fastapi.responses import PlainTextResponse
 
 app = FastAPI()
 
-# In-memory data
 pending_challenges = set()
-active_games = {}  # { (player1, player2): { "board": [...], "turn": "player1", "symbols": {player1: ❌, player2: ⭕} } }
+active_games = {}
 
 def get_empty_board():
     return ["1", "2", "3", "4", "5", "6", "7", "8", "9"]
@@ -21,28 +20,33 @@ async def tac_command(request: Request):
     if not query:
         return PlainTextResponse(f"@{user}, tag someone or use !tac [1-9] to make a move.")
 
-    # If query is a digit between 1-9, it's a move
-    if query.isdigit() and query in "123456789":
-        move = int(query)
-        for pair, game in active_games.items():
-            if user in pair:
-                current_turn = game["turn"]
-                if user != current_turn:
-                    return PlainTextResponse(f"@{user}, it's not your turn!")
-                board = game["board"]
-                if board[move - 1] in ["❌", "⭕"]:
-                    return PlainTextResponse(f"@{user}, that spot is already taken!")
-                symbol = game["symbols"][user]
-                board[move - 1] = symbol
-                # Switch turn
-                next_turn = pair[0] if user == pair[1] else pair[1]
-                game["turn"] = next_turn
-                return PlainTextResponse(
-                    f"@{user} made a move!\n\n{format_board(board)}\n\n@{next_turn}, it's your turn!"
-                )
-        return PlainTextResponse(f"@{user}, you're not in a game. Start one with !tac @username")
+    # Check if user is already in a game
+    user_game = None
+    for pair in active_games:
+        if user in pair:
+            user_game = pair
+            break
 
-    # Otherwise, it's a challenge
+    # If in a game, handle as move
+    if user_game:
+        if query not in "123456789":
+            return PlainTextResponse(f"@{user}, you’re in a game. Use !tac [1-9] to make a move.")
+        move = int(query)
+        game = active_games[user_game]
+        if user != game["turn"]:
+            return PlainTextResponse(f"@{user}, it's not your turn!")
+        board = game["board"]
+        if board[move - 1] in ["❌", "⭕"]:
+            return PlainTextResponse(f"@{user}, that spot is already taken!")
+        symbol = game["symbols"][user]
+        board[move - 1] = symbol
+        next_turn = user_game[0] if user == user_game[1] else user_game[1]
+        game["turn"] = next_turn
+        return PlainTextResponse(
+            f"@{user} made a move!\n\n{format_board(board)}\n\n@{next_turn}, it's your turn!"
+        )
+
+    # Not in a game → treat as challenge
     target = query.lstrip("@")
     if target == user:
         return PlainTextResponse(f"@{user}, you can't play against yourself!")
@@ -56,10 +60,10 @@ async def tac_command(request: Request):
         pending_challenges.remove(pair)
         board = get_empty_board()
         player1, player2 = pair
-        symbols = {user: "❌", target: "⭕"} if user < target else {user: "⭕", target: "❌"}
+        symbols = {player1: "❌", player2: "⭕"}
         active_games[pair] = {
             "board": board,
-            "turn": player1,  # First turn always goes to the alphabetically first user
+            "turn": player1,
             "symbols": symbols
         }
         return PlainTextResponse(
