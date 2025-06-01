@@ -74,7 +74,7 @@ async def tac_command(request: Request):
         next_turn = user_game[0] if user == user_game[1] else user_game[1]
         game["turn"] = next_turn
         return PlainTextResponse(
-            f"---------------------------{format_board(board)} @{user} made a move!, @{next_turn}, it's your turn!"
+            f"------------------------------{format_board(board)} @{user} made a move!, @{next_turn}, it's your turn!"
         )
 
     # Not in a game → handle as challenge
@@ -98,7 +98,7 @@ async def tac_command(request: Request):
             "symbols": symbols
         }
         return PlainTextResponse(
-            f"@{user} vs @{target} — Game started!\n\n{format_board(board)}\n@{player1}, you're ❌ — go first!"
+            f" Game started! ---------------{format_board(board)} @{user} vs @{target} — @{player1}, you're ❌ — go first!"
         )
     else:
         pending_challenges.add(pair)
