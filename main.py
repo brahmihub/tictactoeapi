@@ -22,7 +22,7 @@ def format_board(board):
         rows.append(row)
 
     # Join rows with a visible separator (you can change this)
-    return "-"*10.join(rows) + "\nChoose a number!"
+    return ("-"*10).join(rows) + "Choose a number!"
 
 
 @app.get("/tac")
