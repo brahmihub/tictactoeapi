@@ -8,7 +8,7 @@ active_games = {}
 
 def get_empty_board():
     
-    return ["1️⃣", "2️⃣", "3️⃣", "-4️⃣", "5️⃣", "6️⃣", "-7️⃣", "8️⃣", "9️⃣"]
+    return ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣"]
 
 def format_board(board):
     # Format each cell with spaces (e.g. " 1 ", " ❌ ", etc.)
@@ -99,7 +99,7 @@ async def tac_command(request: Request):
             "symbols": symbols
         }
         return PlainTextResponse(
-            f"GAME STARTED!------------------{format_board(board)} @{user} vs @{target} — @{player1}, you're ❌ — go first!"
+            f"GAME STARTED!-------------{format_board(board)} @{user} vs @{target} — @{player1}, you're ❌ — go first!"
         )
     else:
         pending_challenges.add(pair)
