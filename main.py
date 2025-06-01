@@ -7,15 +7,14 @@ pending_challenges = set()
 active_games = {}
 
 def format_board(board):
+    # Create three rows
     rows = []
     for i in range(0, 9, 3):
         row = [board[i + j] if board[i + j] in ["❌", "⭕"] else board[i + j] for j in range(3)]
         rows.append("|".join(row))
     
-    board_str = " ~ ".join(rows)  # Use ~ or // or ↩ or | to split rows
-    return f"{board_str} — Choose a number!"
-
-
+    # Join the rows using ~ to keep it single-line for Twitch
+    return f"{' ~ '.join(rows)} — Choose a number!"
 
 
 
