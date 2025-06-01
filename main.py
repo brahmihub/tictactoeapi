@@ -10,7 +10,6 @@ def get_empty_board():
     return ["1", "2", "3", "4", "5", "6", "7", "8", "9"]
 
 def format_board(board):
-    # Top row with symbols (❌, ⭕, or blank)
     symbol_row = ""
     for i, cell in enumerate(board):
         symbol = cell if cell in ["❌", "⭕"] else " "
@@ -18,7 +17,6 @@ def format_board(board):
         if (i + 1) % 3 == 0:
             symbol_row += "|\n"
 
-    # Spacer row and numbered row
     numbered_row = ""
     for i, cell in enumerate(board):
         if cell not in ["❌", "⭕"]:
@@ -32,9 +30,9 @@ def format_board(board):
 
 @app.get("/", response_class=PlainTextResponse)
 async def root():
-    return "Tic Tac Toe API is live! Use /tac with user and message query parameters."
+    return "Tic Tac Toe API is live! Use /!tac with user and message query parameters."
 
-@app.get("/tac", response_class=PlainTextResponse)
+@app.get("/!tac", response_class=PlainTextResponse)
 async def tac_command(request: Request):
     user = request.query_params.get("user", "").lstrip("@").lower()
     message = request.query_params.get("message", "").strip().lower()
@@ -44,8 +42,7 @@ async def tac_command(request: Request):
     if not message:
         return PlainTextResponse(f"@{user}, please provide a message parameter to play.")
 
-    # Extract command and argument from message, assuming format "!tac <arg>"
-    # We expect message like "!tac 1" or "!tac @target"
+    # Check message starts with "!tac" (redundant but safe)
     if not message.startswith("!tac"):
         return PlainTextResponse(f"@{user}, invalid command. Use !tac [move or @opponent].")
 
@@ -55,6 +52,8 @@ async def tac_command(request: Request):
     if not query:
         return PlainTextResponse(f"@{user}, tag someone or use !tac [1-9] to make a move.")
 
+    # The rest of your game logic here...
+
     # Check if user is in a game
     user_game = None
     for pair in active_games:
@@ -62,7 +61,6 @@ async def tac_command(request: Request):
             user_game = pair
             break
 
-    # If in a game, treat input as move
     if user_game:
         if query not in "123456789":
             return PlainTextResponse(f"@{user}, you're in a game. Use !tac [1-9] to make a move.")
@@ -81,7 +79,6 @@ async def tac_command(request: Request):
             f"@{user} made a move!\n\n{format_board(board)}\n@{next_turn}, it's your turn!"
         )
 
-    # Not in a game → handle as challenge
     target = query.lstrip("@")
     if target == user:
         return PlainTextResponse(f"@{user}, you can't play against yourself!")
