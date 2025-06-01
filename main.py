@@ -3,93 +3,97 @@ from fastapi.responses import PlainTextResponse
 
 app = FastAPI()
 
-pending_challenges = set()
-active_games = {}
-
-def get_empty_board():
-    return ["1", "2", "3", "4", "5", "6", "7", "8", "9"]
+games = {}
 
 def format_board(board):
-    # Top row with symbols (❌, ⭕, or blank)
-    symbol_row = ""
-    for i, cell in enumerate(board):
-        symbol = cell if cell in ["❌", "⭕"] else " "
-        symbol_row += f"|{symbol}"
-        if (i + 1) % 3 == 0:
-            symbol_row += "|\n"
+    # Formats the board exactly how the user wants for Twitch
+    line1 = f"|{board[0]}|  {board[1]} |  {board[2]} |                                       \n"
+    line2 = f"|  {board[3]} |  {board[4]} |  {board[5]} |                                        \n"
+    line3 = f"|  {board[6]} |  {board[7]} |  {board[8]} |                        \n"
+    return f"{line1}{line2}{line3}Choose one of the available numbers!"
 
-    # Spacer row and numbered row
-    numbered_row = ""
-    for i, cell in enumerate(board):
-        if cell not in ["❌", "⭕"]:
-            numbered_row += f"|  {cell} "
+def create_new_board():
+    return ["1", "2", "3", "4", "5", "6", "7", "8", "9"]
+
+@app.get("/", response_class=PlainTextResponse)
+async def root(request: Request):
+    args = request.query_params
+    user = args.get("user", "").strip("@")
+    message = args.get("message", "").strip()
+
+    if not message:
+        return "Please provide a command."
+
+    parts = message.split()
+    command = parts[0].lower()
+
+    # Challenge someone
+    if command == "!tac":
+        if len(parts) == 2 and parts[1].isdigit():  # Player is trying to make a move
+            move = parts[1]
+            for game_id, game in games.items():
+                if user in [game["player1"], game["player2"]]:
+                    if game["turn"] != user:
+                        return f"@{user}, it's not your turn!"
+                    if move not in game["board"]:
+                        return f"@{user}, invalid move!"
+                    index = game["board"].index(move)
+                    game["board"][index] = game["symbols"][user]
+                    board_str = format_board(game["board"])
+
+                    # Check for win
+                    b = game["board"]
+                    s = game["symbols"][user]
+                    wins = [(0,1,2),(3,4,5),(6,7,8),(0,3,6),(1,4,7),(2,5,8),(0,4,8),(2,4,6)]
+                    if any(b[a]==b[b_]==b[c]==s for a,b_,c in wins):
+                        games.pop(game_id)
+                        return f"@{user} made a move!\n{board_str}\n@{user} wins the game! 🎉"
+
+                    # Check draw
+                    if all(pos in ['❌', '⭕'] for pos in game["board"]):
+                        games.pop(game_id)
+                        return f"@{user} made a move!\n{board_str}\nIt's a draw!"
+
+                    # Switch turn
+                    other = game["player1"] if game["turn"] == game["player2"] else game["player2"]
+                    game["turn"] = other
+                    return f"@{user} made a move!\n{board_str}\n@{other}, it's your turn!"
+
+            return f"@{user}, you are not currently in a game!"
+        
+        elif len(parts) == 2:  # Challenge another player
+            opponent = parts[1].strip("@")
+            if opponent == user:
+                return f"@{user}, you can't challenge yourself. Tag someone else."
+
+            # If already a game exists between these players
+            game_id = tuple(sorted([user, opponent]))
+            if game_id in games:
+                game = games[game_id]
+                if not game.get("accepted"):
+                    return f"@{opponent}, type !tac {user} to accept the challenge."
+                else:
+                    return f"@{user}, you're already in a game with @{opponent}!"
+
+            # If this is an acceptance of a challenge
+            for (p1, p2), game in games.items():
+                if not game.get("accepted") and user in [p1, p2] and opponent in [p1, p2]:
+                    game["accepted"] = True
+                    game["turn"] = p1
+                    board_str = format_board(game["board"])
+                    return f"Match started between @{p1} (❌) and @{p2} (⭕)!\n{board_str}\n@{p1}, it's your turn!"
+            
+            # Start new challenge
+            games[game_id] = {
+                "player1": user,
+                "player2": opponent,
+                "board": create_new_board(),
+                "accepted": False,
+                "symbols": {user: "❌", opponent: "⭕"},
+            }
+            return f"@{user} vs @{opponent} — Tic Tac Toe challenge sent!\n@{opponent}, type !tac {user} to accept."
+
         else:
-            numbered_row += "|     "
-        if (i + 1) % 3 == 0:
-            numbered_row += "|\n"
+            return f"@{user}, tag someone to start a Tic Tac Toe game."
 
-    return f"{symbol_row}{numbered_row}Choose one of the available numbers!"
-
-@app.get("/tac")
-async def tac_command(request: Request):
-    user = request.query_params.get("user", "").lstrip("@").lower()
-    query = request.query_params.get("query", "").strip().lower()
-
-    if not query:
-        return PlainTextResponse(f"@{user}, tag someone or use !tac [1-9] to make a move.")
-
-    # Check if user is in a game
-    user_game = None
-    for pair in active_games:
-        if user in pair:
-            user_game = pair
-            break
-
-    # If in a game, treat input as move
-    if user_game:
-        if query not in "123456789":
-            return PlainTextResponse(f"@{user}, you're in a game. Use !tac [1-9] to make a move.")
-        move = int(query)
-        game = active_games[user_game]
-        if user != game["turn"]:
-            return PlainTextResponse(f"@{user}, it's not your turn!")
-        board = game["board"]
-        if board[move - 1] in ["❌", "⭕"]:
-            return PlainTextResponse(f"@{user}, that spot is already taken!")
-        symbol = game["symbols"][user]
-        board[move - 1] = symbol
-        next_turn = user_game[0] if user == user_game[1] else user_game[1]
-        game["turn"] = next_turn
-        return PlainTextResponse(
-            f"@{user} made a move!\n\n{format_board(board)}\n@{next_turn}, it's your turn!"
-        )
-
-    # Not in a game → handle as challenge
-    target = query.lstrip("@")
-    if target == user:
-        return PlainTextResponse(f"@{user}, you can't play against yourself!")
-
-    pair = tuple(sorted([user, target]))
-
-    if pair in active_games:
-        return PlainTextResponse(f"A game is already in progress between @{pair[0]} and @{pair[1]}!")
-
-    if pair in pending_challenges:
-        pending_challenges.remove(pair)
-        board = get_empty_board()
-        player1, player2 = pair
-        symbols = {player1: "❌", player2: "⭕"}
-        active_games[pair] = {
-            "board": board,
-            "turn": player1,
-            "symbols": symbols
-        }
-        return PlainTextResponse(
-            f"@{user} vs @{target} — Game started!\n\n{format_board(board)}\n@{player1}, you're ❌ — go first!"
-        )
-    else:
-        pending_challenges.add(pair)
-        return PlainTextResponse(
-            f"@{user} vs @{target} — Tic Tac Toe challenge sent!\n"
-            f"@{target}, type !tac {user} to accept."
-        )
+    return "Unknown command."
