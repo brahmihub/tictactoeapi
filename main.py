@@ -99,7 +99,7 @@ async def tac_command(request: Request):
             "symbols": symbols
         }
         return PlainTextResponse(
-            f"GAME STARTED!-------------{format_board(board)} @{user} vs @{target} — @{player1}, you're ❌ — go first!"
+            f"GAME STARTED!-----------{format_board(board)} @{user} vs @{target} — @{player1}, you're ❌ — go first!"
         )
     else:
         pending_challenges.add(pair)
