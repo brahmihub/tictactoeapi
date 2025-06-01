@@ -22,7 +22,7 @@ def format_board(board):
         rows.append(row)
 
     # Join rows with a visible separator (you can change this)
-    return "..........................................................................".join(rows)
+    return "....................................................................".join(rows)
 
 
 @app.get("/tac")
@@ -74,7 +74,7 @@ async def tac_command(request: Request):
         next_turn = user_game[0] if user == user_game[1] else user_game[1]
         game["turn"] = next_turn
         return PlainTextResponse(
-            f"------------------------------{format_board(board)} @{user} made a move!, @{next_turn}, it's your turn!"
+            f"--------------------------{format_board(board)} @{user} made a move!, @{next_turn}, it's your turn!"
         )
 
     # Not in a game → handle as challenge
