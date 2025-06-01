@@ -10,25 +10,18 @@ def get_empty_board():
     return ["1", "2", "3", "4", "5", "6", "7", "8", "9"]
 
 def format_board(board):
-    # Top row with symbols (❌, ⭕, or blank)
-    symbol_row = ""
-    for i, cell in enumerate(board):
-        symbol = cell if cell in ["❌", "⭕"] else " "
-        symbol_row += f"|{symbol}"
-        if (i + 1) % 3 == 0:
-            symbol_row += "|\n"
+    display = ""
 
-    # Spacer row and numbered row
-    numbered_row = ""
-    for i, cell in enumerate(board):
-        if cell not in ["❌", "⭕"]:
-            numbered_row += f"|  {cell} "
-        else:
-            numbered_row += "|     "
-        if (i + 1) % 3 == 0:
-            numbered_row += "|\n"
+    # First row
+    display += f"|{board[0] if board[0] in ['❌', '⭕'] else '  ' + board[0]}|  {board[1] if board[1] in ['❌', '⭕'] else board[1]} |  {board[2] if board[2] in ['❌', '⭕'] else board[2]} |                                       \n"
+    # Second row
+    display += f"|  {board[3] if board[3] not in ['❌', '⭕'] else ' '} |  {board[4] if board[4] not in ['❌', '⭕'] else ' '} |  {board[5] if board[5] not in ['❌', '⭕'] else ' '} |                                        \n"
+    # Third row
+    display += f"|  {board[6] if board[6] not in ['❌', '⭕'] else ' '} |  {board[7] if board[7] not in ['❌', '⭕'] else ' '} |  {board[8] if board[8] not in ['❌', '⭕'] else ' '} |                        \n"
 
-    return f"{symbol_row}{numbered_row}Choose one of the available numbers!"
+    display += "Choose one of the available numbers!"
+    return display
+
 
 @app.get("/tac")
 async def tac_command(request: Request):
