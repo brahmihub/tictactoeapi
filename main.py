@@ -17,7 +17,7 @@ def format_board(board):
         rows.append("|".join(row))
     
     # Join the rows using ~ to make a single-line board for Twitch
-    return f"{'              .....                                                 '.join(rows)}  Choose a number!"
+    return f"{'...................................................................................'.join(rows)}  Choose a number!"
 
 @app.get("/tac")
 async def tac_command(request: Request):
